@@ -5,3 +5,4 @@ class StandVirtualItem(Item):
     link = Field()
     title = Field()
     price = Field()
+    photo = Field()

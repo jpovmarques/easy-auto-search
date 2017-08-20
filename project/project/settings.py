@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
-
-# Scrapy settings for project project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     http://doc.scrapy.org/en/latest/topics/settings.html
-#     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+from project.utils.network import NetworkUtils
 
 BOT_NAME = 'project'
 
 SPIDER_MODULES = ['project.spiders']
 NEWSPIDER_MODULE = 'project.spiders'
+
+LOG_LEVEL = 'INFO'
+# LOG_ENABLED = False
+USER_AGENT = NetworkUtils.choose_user_agent()['USERAGENT']
+COOKIES_ENABLED = False
+HTTPCACHE_ENABLED = True
+
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
