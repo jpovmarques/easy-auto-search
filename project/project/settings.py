@@ -5,7 +5,7 @@ BOT_NAME = 'project'
 SPIDER_MODULES = ['project.spiders']
 NEWSPIDER_MODULE = 'project.spiders'
 
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'DEBUG'
 # LOG_ENABLED = False
 USER_AGENT = NetworkUtils.choose_user_agent()['USERAGENT']
 COOKIES_ENABLED = False

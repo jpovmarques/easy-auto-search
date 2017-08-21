@@ -4,10 +4,9 @@ from project.utils.network import NetworkUtils
 
 
 def main():
-    lixo = NetworkUtils.choose_user_agent()
-    print(lixo)
-    process = CrawlerProcess(lixo)
-    process.crawl(StandVirtualSpider)
+    input_brand = input('Brand:')
+    process = CrawlerProcess(NetworkUtils.choose_user_agent())
+    process.crawl(StandVirtualSpider, brand=input_brand)
     process.start()
 
 

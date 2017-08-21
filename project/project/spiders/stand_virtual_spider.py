@@ -1,4 +1,5 @@
 import re
+import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
 from project.items import StandVirtualItem
@@ -7,9 +8,13 @@ from project.items import StandVirtualItem
 class StandVirtualSpider(Spider):
     name = "standvirtual"
     allowed_domains = ["https://www.standvirtual.com"]
-    start_urls = [
-        "https://www.standvirtual.com/carros/bmw/?search%5Bnew_used%5D=on"
-    ]
+
+    def start_requests(self):
+        url = (
+            'https://www.standvirtual.com/carros/{}/?search%5Bnew_used%5D=on'
+            .format(self.brand)
+        )
+        yield scrapy.Request(url)
 
     def parse(self, response):
         ads = Selector(response).xpath(
