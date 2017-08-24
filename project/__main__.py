@@ -5,7 +5,7 @@ from project.utils.network import NetworkUtils
 
 def main():
     input_brand = input('Brand:')
-    process = CrawlerProcess(NetworkUtils.choose_user_agent())
+    process = CrawlerProcess(NetworkUtils.set_user_agent())
     process.crawl(StandVirtualSpider, brand=input_brand)
     process.start()
 

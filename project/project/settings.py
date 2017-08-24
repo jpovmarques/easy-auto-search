@@ -7,7 +7,7 @@ NEWSPIDER_MODULE = 'project.spiders'
 
 LOG_LEVEL = 'DEBUG'
 # LOG_ENABLED = False
-USER_AGENT = NetworkUtils.choose_user_agent()['USERAGENT']
+USER_AGENT = NetworkUtils.set_user_agent()['USERAGENT']
 COOKIES_ENABLED = False
 HTTPCACHE_ENABLED = True
 

@@ -9,16 +9,22 @@ class StandVirtualSpider(Spider):
     name = "standvirtual"
     allowed_domains = ["https://www.standvirtual.com"]
 
+    '''start_urls = (
+        'https://www.standvirtual.com/carros/BMW/?search%5Bnew_used%5D=on',
+    )'''
+
     def start_requests(self):
         url = (
             'https://www.standvirtual.com/'
             'carros/{brand}/?search%5Bnew_used%5D=on'
             .format(brand=self.brand)
         )
-        print('url, url')
-        yield scrapy.Request(url)
+        yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
+
+        print('parse')
+
         ads = Selector(response).xpath(
             '//div[@class="offers list"]/article'
         )
@@ -50,13 +56,15 @@ class StandVirtualSpider(Spider):
                 text()'''
             ).extract()[0]
 
-            item['link'] = ad.xpath(
+            link = ad.xpath(
                 '''div[@class="offer-item__content"]/
                 div[@class="offer-item__title"]/
                 h2[@class="offer-title"]/
                 a[@class="offer-title__link"]/
                 @href'''
             ).extract()[0]
+
+            item['link'] = link
 
             item['title'] = ad.xpath(
                 '''div[@class="offer-item__content"]/
@@ -85,4 +93,28 @@ class StandVirtualSpider(Spider):
                 picture
             ).group(0).split("'")[1]
 
+            item['location'] = ad.xpath(
+                '''div[@class="offer-item__content"]/
+                div[@class="offer-item__bottom-row "]/
+                span[@class="offer-item__location"]/
+                h4/
+                em/
+                text()'''
+            ).extract()
+
             yield item
+
+            '''yield scrapy.Request(
+                link,
+                self.parse_content,
+                meta={'item': item}
+            )'''
+
+    def parse_content(self, response):
+        item2 = response.meta['item']
+        print('parse_content')
+        yield item2
+
+        '''item['brand'] = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]/li[2]/div/a/@title'
+        )'''

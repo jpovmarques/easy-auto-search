@@ -5,7 +5,7 @@ class StandVirtualItem(Item):
     brand = Field()  # TODO
     model = Field()  # TODO
     gas_type = Field()
-    power = Field()  # TODO
+    power = Field()
     lotation = Field()  # TODO
     year = Field()  # TODO
     kms = Field()  # TODO
@@ -13,4 +13,4 @@ class StandVirtualItem(Item):
     picture = Field()
     link = Field()
     title = Field()
-    location = Field()  # TODO
+    location = Field()
