@@ -1,6 +1,6 @@
 from scrapy.crawler import CrawlerProcess
 from project.spiders.stand_virtual_spider import StandVirtualSpider
-from project.utils.network import NetworkUtils
+from project.utils.network_handler import NetworkUtils
 
 
 def main():

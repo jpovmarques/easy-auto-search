@@ -1,17 +1,20 @@
-import re
 import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
 from project.items import StandVirtualItem
+from project.utils.regex_handler import (
+    extract_beetwen_quotes,
+    remove_spaces_and_paragraph
+)
 
 
 class StandVirtualSpider(Spider):
     name = "standvirtual"
-    allowed_domains = ["https://www.standvirtual.com"]
 
-    '''start_urls = (
-        'https://www.standvirtual.com/carros/BMW/?search%5Bnew_used%5D=on',
-    )'''
+    allowed_domains = [
+        "https://www.standvirtual.com",
+        "www.standvirtual.com"
+    ]
 
     def start_requests(self):
         url = (
@@ -22,9 +25,7 @@ class StandVirtualSpider(Spider):
         yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
-
-        print('parse')
-
+        '''Extract ad preview's content into item object'''
         ads = Selector(response).xpath(
             '//div[@class="offers list"]/article'
         )
@@ -54,7 +55,7 @@ class StandVirtualSpider(Spider):
                 li[@data-code="first_registration_year"]/
                 span/
                 text()'''
-            ).extract()[0]
+            ).extract()[0].rstrip()
 
             link = ad.xpath(
                 '''div[@class="offer-item__content"]/
@@ -87,34 +88,79 @@ class StandVirtualSpider(Spider):
                 a[@class="offer-item__photo-link"]/
                 @style''').extract_first()
 
-            # TODO: Make regex more restrict
-            item['picture'] = re.search(
-                r"'.*'",
-                picture
-            ).group(0).split("'")[1]
+            item['picture'] = extract_beetwen_quotes(picture)
 
-            item['location'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
-                div[@class="offer-item__bottom-row "]/
-                span[@class="offer-item__location"]/
-                h4/
-                em/
-                text()'''
-            ).extract()
+            try:
+                item['location'] = ad.xpath(
+                    '''div[@class="offer-item__content"]/
+                    div[@class="offer-item__bottom-row "]/
+                    span[@class="offer-item__location"]/
+                    h4/
+                    em/
+                    text()'''
+                ).extract()[0]
+            except IndexError:
+                    item['location'] = None
 
-            yield item
-
-            '''yield scrapy.Request(
+            yield scrapy.Request(
                 link,
                 self.parse_content,
                 meta={'item': item}
-            )'''
+            )
 
     def parse_content(self, response):
-        item2 = response.meta['item']
-        print('parse_content')
-        yield item2
+        '''Extract ad's full content into item object'''
+        item = response.meta['item']
 
-        '''item['brand'] = Selector(response).xpath(
+        item['brand'] = Selector(response).xpath(
             '//*[@id="parameters"]/ul[1]/li[2]/div/a/@title'
-        )'''
+        ).extract()[0]
+
+        item['model'] = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]/li[3]/div/a/@title'
+        ).extract()[0]
+
+        try:
+            item['serie'] = Selector(response).xpath(
+                '//*[@id="parameters"]/ul[1]/li[4]/div/a/@title'
+            ).extract()[0]
+        except IndexError:
+            item['version'] = None
+
+        try:
+            version = Selector(response).xpath(
+                '//*[@id="parameters"]/ul[1]/li[5]/div/text()'
+            ).extract()[0]
+            item['version'] = remove_spaces_and_paragraph(version)
+        except IndexError:
+            item['version'] = None
+
+        kms = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]/li[9]/div/text()'
+        ).extract()[0]
+        item['kms'] = remove_spaces_and_paragraph(kms)
+
+        try:
+            capacity = Selector(response).xpath(
+                '//*[@id="parameters"]/ul[1]/li[11]/div/text()'
+            ).extract()[0]
+        except IndexError:
+            try:
+                capacity = Selector(response).xpath(
+                    '//*[@id="parameters"]/ul[2]/li[2]/div'
+                ).extract()[0]
+            except IndexError:
+                capacity = None
+
+        if capacity is not None and not '':
+            item['capacity'] = remove_spaces_and_paragraph(capacity)
+
+        '''item['lotation'] = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]/li[18]/div/a/@title'
+        ).extract()[0]  #'''
+
+        '''item['color'] = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]/li[14]/div/a/@title'
+        ).extract()[0]  #'''
+
+        yield item

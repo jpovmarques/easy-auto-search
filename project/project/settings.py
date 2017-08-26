@@ -1,4 +1,4 @@
-from project.utils.network import NetworkUtils
+from project.utils.network_handler import NetworkUtils
 
 BOT_NAME = 'project'
 
@@ -9,7 +9,7 @@ LOG_LEVEL = 'DEBUG'
 # LOG_ENABLED = False
 USER_AGENT = NetworkUtils.set_user_agent()['USERAGENT']
 COOKIES_ENABLED = False
-HTTPCACHE_ENABLED = True
+HTTPCACHE_ENABLED = False
 
 
 

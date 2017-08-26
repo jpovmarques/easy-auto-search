@@ -2,13 +2,17 @@ from scrapy.item import Item, Field
 
 
 class StandVirtualItem(Item):
-    brand = Field()  # TODO
-    model = Field()  # TODO
+    brand = Field()
+    model = Field()
+    serie = Field()
+    version = Field()
     gas_type = Field()
     power = Field()
-    lotation = Field()  # TODO
-    year = Field()  # TODO
-    kms = Field()  # TODO
+    capacity = Field()
+    lotation = Field()
+    color = Field()
+    year = Field()
+    kms = Field()
     price = Field()
     picture = Field()
     link = Field()
