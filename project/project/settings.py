@@ -11,8 +11,6 @@ USER_AGENT = NetworkUtils.set_user_agent()['USERAGENT']
 COOKIES_ENABLED = False
 HTTPCACHE_ENABLED = False
 
-
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'project (+http://www.yourdomain.com)'
 

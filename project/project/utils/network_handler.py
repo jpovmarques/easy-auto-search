@@ -1,10 +1,11 @@
 import random
+from typing import Dict
 
 
-class NetworkUtils():
+class NetworkUtils:
 
-    def set_user_agent():
-        user_agent_list = [
+    def get_user_agent() -> Dict:
+        USER_AGENTS_LIST = [
             'Mozilla/4.0(compatible;'
             ' MSIE 7.0;Windows NT 5.1)',
             'Mozilla/5.0(Windows NT 6.1;'
@@ -24,4 +25,4 @@ class NetworkUtils():
             ' AppleWebKit/600.7.12(KHTML, like Gecko)'
             ' Version/8.0.7 Safari/600.7.12'
         ]
-        return {'USERAGENT': random.choice(user_agent_list)}
+        return {'USERAGENT': random.choice(USER_AGENTS_LIST)}

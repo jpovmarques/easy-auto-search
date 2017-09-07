@@ -24,6 +24,7 @@ class StandVirtualSpider(Spider):
         )
         yield scrapy.Request(url, self.parse)
 
+
     def parse(self, response):
         '''Extract ad preview's content into item object'''
         ads = Selector(response).xpath(
@@ -88,8 +89,10 @@ class StandVirtualSpider(Spider):
                 a[@class="offer-item__photo-link"]/
                 @style''').extract_first()
 
-            item['picture'] = extract_beetwen_quotes(picture)
-
+            if picture is not None:
+                match = extract_beetwen_quotes(picture)
+                if match is not None:
+                    item['picture'] = match
             try:
                 item['location'] = ad.xpath(
                     '''div[@class="offer-item__content"]/
@@ -102,11 +105,13 @@ class StandVirtualSpider(Spider):
             except IndexError:
                     item['location'] = None
 
-            yield scrapy.Request(
-                link,
-                self.parse_content,
-                meta={'item': item}
-            )
+            # yield scrapy.Request(
+            #     link,
+            #     self.parse_content,
+            #     meta={'item': item}
+            # )
+
+            yield item
 
     def parse_content(self, response):
         '''Extract ad's full content into item object'''
@@ -154,13 +159,5 @@ class StandVirtualSpider(Spider):
 
         if capacity is not None and not '':
             item['capacity'] = remove_spaces_and_paragraph(capacity)
-
-        '''item['lotation'] = Selector(response).xpath(
-            '//*[@id="parameters"]/ul[1]/li[18]/div/a/@title'
-        ).extract()[0]  #'''
-
-        '''item['color'] = Selector(response).xpath(
-            '//*[@id="parameters"]/ul[1]/li[14]/div/a/@title'
-        ).extract()[0]  #'''
 
         yield item
