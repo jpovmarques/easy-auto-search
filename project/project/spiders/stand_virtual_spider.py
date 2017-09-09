@@ -3,8 +3,8 @@ from scrapy import Spider
 from scrapy.selector import Selector
 from project.items import StandVirtualItem
 from project.utils.regex_handler import (
-    extract_beetwen_quotes,
-    remove_spaces_and_paragraph
+    _extract_beetwen_quotes,
+    _remove_spaces_and_paragraph_from_list
 )
 
 
@@ -24,140 +24,133 @@ class StandVirtualSpider(Spider):
         )
         yield scrapy.Request(url, self.parse)
 
-
     def parse(self, response):
-        '''Extract ad preview's content into item object'''
-        ads = Selector(response).xpath(
+        """Parse ad preview's data into item object"""
+        ad_previews = Selector(response).xpath(
             '//div[@class="offers list"]/article'
         )
-
-        for ad in ads:
+        for ad in ad_previews:
             item = StandVirtualItem()
 
-            item['gas_type'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
+            gas_type= ad.xpath(
+                ('''div[@class="offer-item__content"]/
                 ul[@class="offer-item__params"]/
                 li[@data-code="fuel_type"]/
                 span/
-                text()'''
-            ).extract()[0]
+                text()''')
+            ).extract_first()
+            if gas_type:
+                item['gas_type'] = gas_type
 
-            item['power'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
+            power = ad.xpath(
+                ('''div[@class="offer-item__content"]/
                 ul[@class="offer-item__params"]/
                 li[@data-code="power"]/
                 span/
-                text()'''
-            ).extract()[0]
+                text()''')
+            ).extract_first()
+            if power:
+                item['power'] = power
 
-            item['year'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
+            year = ad.xpath(
+                ('''div[@class="offer-item__content"]/
                 ul[@class="offer-item__params"]/
                 li[@data-code="first_registration_year"]/
                 span/
-                text()'''
-            ).extract()[0].rstrip()
+                text()''')
+            ).extract_first()
+            if year:
+                item['year'] = year.rstrip()
 
             link = ad.xpath(
-                '''div[@class="offer-item__content"]/
+                ('''div[@class="offer-item__content"]/
                 div[@class="offer-item__title"]/
                 h2[@class="offer-title"]/
                 a[@class="offer-title__link"]/
-                @href'''
-            ).extract()[0]
+                @href''')
+            ).extract_first()
+            if link:
+                item['link'] = link   
 
-            item['link'] = link
-
-            item['title'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
+            title = ad.xpath(
+                ('''div[@class="offer-item__content"]/
                 div[@class="offer-item__title"]/
                 h2[@class="offer-title"]/
                 a[@class="offer-title__link"]/
-                @title'''
-            ).extract()[0]
+                @title''')
+            ).extract_first()
+            if title:
+                item['title'] = title
 
-            item['price'] = ad.xpath(
-                '''div[@class="offer-item__content"]/
+            price = ad.xpath(
+                ('''div[@class="offer-item__content"]/
                 div[@class="offer-item__price"]/
                 div[@class="offer-price"]/
                 span[@class="offer-price__number"]/
-                text()'''
-            ).extract()[0].rstrip()
+                text()''')
+            ).extract_first()
+            if price:
+                item['price'] = price.rstrip()
 
             picture = ad.xpath(
-                '''div[@class="offer-item__photo "]/
+                ('''div[@class="offer-item__photo "]/
                 a[@class="offer-item__photo-link"]/
-                @style''').extract_first()
-
-            if picture is not None:
-                match = extract_beetwen_quotes(picture)
-                if match is not None:
+                @style''')
+            ).extract_first()
+            if picture:
+                match = _extract_beetwen_quotes(picture)
+                if match:
                     item['picture'] = match
-            try:
-                item['location'] = ad.xpath(
-                    '''div[@class="offer-item__content"]/
-                    div[@class="offer-item__bottom-row "]/
-                    span[@class="offer-item__location"]/
-                    h4/
-                    em/
-                    text()'''
-                ).extract()[0]
-            except IndexError:
-                    item['location'] = None
+            
+            location = ad.xpath(
+                ('''div[@class="offer-item__content"]/
+                div[@class="offer-item__bottom-row "]/
+                span[@class="offer-item__location"]/
+                h4/
+                em/
+                text()''')
+            ).extract_first()
+            if location:
+                item['location'] = location
 
-            # yield scrapy.Request(
-            #     link,
-            #     self.parse_content,
-            #     meta={'item': item}
-            # )
+            yield scrapy.Request(
+                link,
+                self.parse_content,
+                meta={'item': item}
+            )
 
             yield item
 
     def parse_content(self, response):
-        '''Extract ad's full content into item object'''
+        """Parse ad's full content into item object"""
         item = response.meta['item']
 
-        item['brand'] = Selector(response).xpath(
-            '//*[@id="parameters"]/ul[1]/li[2]/div/a/@title'
-        ).extract()[0]
-
-        item['model'] = Selector(response).xpath(
-            '//*[@id="parameters"]/ul[1]/li[3]/div/a/@title'
-        ).extract()[0]
-
-        try:
-            item['serie'] = Selector(response).xpath(
-                '//*[@id="parameters"]/ul[1]/li[4]/div/a/@title'
-            ).extract()[0]
-        except IndexError:
-            item['version'] = None
-
-        try:
-            version = Selector(response).xpath(
-                '//*[@id="parameters"]/ul[1]/li[5]/div/text()'
-            ).extract()[0]
-            item['version'] = remove_spaces_and_paragraph(version)
-        except IndexError:
-            item['version'] = None
-
-        kms = Selector(response).xpath(
-            '//*[@id="parameters"]/ul[1]/li[9]/div/text()'
-        ).extract()[0]
-        item['kms'] = remove_spaces_and_paragraph(kms)
-
-        try:
-            capacity = Selector(response).xpath(
-                '//*[@id="parameters"]/ul[1]/li[11]/div/text()'
-            ).extract()[0]
-        except IndexError:
-            try:
-                capacity = Selector(response).xpath(
-                    '//*[@id="parameters"]/ul[2]/li[2]/div'
-                ).extract()[0]
-            except IndexError:
-                capacity = None
-
-        if capacity is not None and not '':
-            item['capacity'] = remove_spaces_and_paragraph(capacity)
+        ad_contents = Selector(response).xpath(
+            '//ul[@class="offer-params__list"]'
+        )
+        main_list = []
+        for content_column in ad_contents:
+            content_list_label = content_column.xpath(
+            ('''li[@class="offer-params__item"]/
+                span[@class="offer-params__label"]/
+                text()''')
+            ).extract()
+            # content_list_value = content_column.xpath(
+            #     ('''li[@class="offer-params__item"]/
+            #     div[@class="offer-params__value"]/
+            #     text()''')
+            # ).extract()
+            content_list_link_value =content_column.xpath(
+                ('''li[@class="offer-params__item"]/
+                div[@class="offer-params__value"]/
+                a[@class="offer-params__link"]/
+                @title''')
+            ).extract()
+            zipped = list(zip(
+                content_list_label,
+                _remove_spaces_and_paragraph_from_list(content_list_link_value)
+                ))
+            main_list = main_list + zipped
+        print(main_list)
 
         yield item

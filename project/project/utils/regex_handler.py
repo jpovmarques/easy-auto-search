@@ -1,7 +1,7 @@
 import re
 
 
-def extract_beetwen_quotes(string):
+def _extract_beetwen_quotes(string):
     '''Return's the given string beetwen two quotes with extention .jpg'''
     try:
     	return re.fullmatch(
@@ -9,8 +9,17 @@ def extract_beetwen_quotes(string):
     		string
     	).group('image_url')
     except AttributeError:
-    	return
+    	return None
 
-def remove_spaces_and_paragraph(string):
+
+def _remove_spaces_and_paragraph_from_list(_list):
+    '''Return's the given list without spaces and \n'''
+    new_list = []
+    for element in _list:
+        new_list.append(_remove_spaces_and_paragraph(element))
+    return new_list
+
+
+def _remove_spaces_and_paragraph(string):
     '''Return's the given string without spaces and \n'''
-    return re.subn(r"^\n", '', string)[0].strip()
+    return re.subn(r"\n", '', string)[0].strip()
