@@ -128,29 +128,40 @@ class StandVirtualSpider(Spider):
         ad_contents = Selector(response).xpath(
             '//ul[@class="offer-params__list"]'
         )
-        main_list = []
+
+        i = {}
+        count_value = 0
+        count_link = 0
         for content_column in ad_contents:
             content_list_label = content_column.xpath(
             ('''li[@class="offer-params__item"]/
                 span[@class="offer-params__label"]/
                 text()''')
             ).extract()
-            # content_list_value = content_column.xpath(
-            #     ('''li[@class="offer-params__item"]/
-            #     div[@class="offer-params__value"]/
-            #     text()''')
-            # ).extract()
+            content_list_value = content_column.xpath(
+                ('''li[@class="offer-params__item"]/
+                div[@class="offer-params__value"]/
+                text()''')
+            ).extract()
             content_list_link_value =content_column.xpath(
                 ('''li[@class="offer-params__item"]/
                 div[@class="offer-params__value"]/
                 a[@class="offer-params__link"]/
                 @title''')
             ).extract()
-            zipped = list(zip(
-                content_list_label,
-                _remove_spaces_and_paragraph_from_list(content_list_link_value)
-                ))
-            main_list = main_list + zipped
-        print(main_list)
 
+            for label in content_list_label:
+                if label:
+                    print({'label': label})
+                    value = content_list_link_value[count_value]
+                    link_value = content_list_value[count_value]
+                    print({'value': value})
+                    print({'link_value': link_value})                    
+                    if value is not None and value.find('\n', 1, 2) != -1:
+                        i[label] = value
+                    elif link_value is not None and link_value.find('\n', 1, 2) != -1:
+                        i[label] = link_value
+                    count_value = count_value + 1
+
+        print({'dict': i})
         yield item
