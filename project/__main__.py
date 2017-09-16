@@ -9,5 +9,6 @@ def main():
     process.crawl(StandVirtualSpider, brand=input_brand)
     process.start()
 
+
 if __name__ == "__main__":
     main()

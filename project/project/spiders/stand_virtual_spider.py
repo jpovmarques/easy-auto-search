@@ -2,10 +2,7 @@ import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
 from project.items import StandVirtualItem
-from project.utils.regex_handler import (
-    _extract_beetwen_quotes,
-    _remove_spaces_and_paragraph_from_list
-)
+from project.utils.regex_handler import RegexHandler
 
 
 class StandVirtualSpider(Spider):
@@ -32,7 +29,7 @@ class StandVirtualSpider(Spider):
         for ad in ad_previews:
             item = StandVirtualItem()
 
-            gas_type= ad.xpath(
+            gas_type = ad.xpath(
                 ('''div[@class="offer-item__content"]/
                 ul[@class="offer-item__params"]/
                 li[@data-code="fuel_type"]/
@@ -70,7 +67,7 @@ class StandVirtualSpider(Spider):
                 @href''')
             ).extract_first()
             if link:
-                item['link'] = link   
+                item['link'] = link
 
             title = ad.xpath(
                 ('''div[@class="offer-item__content"]/
@@ -90,7 +87,7 @@ class StandVirtualSpider(Spider):
                 text()''')
             ).extract_first()
             if price:
-                item['price'] = price.rstrip()
+                item['price'] = price.rstrip() + ' eur'
 
             picture = ad.xpath(
                 ('''div[@class="offer-item__photo "]/
@@ -98,10 +95,10 @@ class StandVirtualSpider(Spider):
                 @style''')
             ).extract_first()
             if picture:
-                match = _extract_beetwen_quotes(picture)
+                match = RegexHandler.extract_beetwen_quotes(picture)
                 if match:
                     item['picture'] = match
-            
+
             location = ad.xpath(
                 ('''div[@class="offer-item__content"]/
                 div[@class="offer-item__bottom-row "]/
@@ -119,19 +116,19 @@ class StandVirtualSpider(Spider):
                 meta={'item': item}
             )
 
-            yield item
-
-    def parse_content(self, response):
+    @staticmethod
+    def parse_content(response):
         """Parse ad's full content into item object"""
         item = response.meta['item']
 
-        ad_contents = Selector(response).xpath(
-            '//ul[@class="offer-params__list"]'
-        )
+        ad_contents_left_column = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[1]'
+            )
+        ad_contents_right_column = Selector(response).xpath(
+            '//*[@id="parameters"]/ul[2]'
+            )
+        ad_contents = ad_contents_left_column + ad_contents_right_column
 
-        i = {}
-        count_value = 0
-        count_link = 0
         for content_column in ad_contents:
             content_list_label = content_column.xpath(
             ('''li[@class="offer-params__item"]/
@@ -143,25 +140,28 @@ class StandVirtualSpider(Spider):
                 div[@class="offer-params__value"]/
                 text()''')
             ).extract()
-            content_list_link_value =content_column.xpath(
+            content_list_link_value = content_column.xpath(
                 ('''li[@class="offer-params__item"]/
                 div[@class="offer-params__value"]/
                 a[@class="offer-params__link"]/
                 @title''')
             ).extract()
 
-            for label in content_list_label:
-                if label:
-                    print({'label': label})
-                    value = content_list_link_value[count_value]
-                    link_value = content_list_value[count_value]
-                    print({'value': value})
-                    print({'link_value': link_value})                    
-                    if value is not None and value.find('\n', 1, 2) != -1:
-                        i[label] = value
-                    elif link_value is not None and link_value.find('\n', 1, 2) != -1:
-                        i[label] = link_value
-                    count_value = count_value + 1
+            content_list_all_values = content_list_link_value + content_list_value
 
-        print({'dict': i})
+            for label, value in zip(content_list_label, content_list_all_values):
+                if label == 'Marca' and value:
+                    item['brand'] = value
+                if label == 'Modelo' and value:
+                    item['model'] = value
+
+            for value in content_list_all_values:
+                    capacity_match = RegexHandler.get_capacity_value(value)
+                    if capacity_match:
+                        item['capacity'] = capacity_match
+
+                    kms_match = RegexHandler.get_kms_value(value)
+                    if kms_match:
+                        item['kms'] = kms_match
+
         yield item
