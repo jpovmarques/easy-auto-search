@@ -2,13 +2,13 @@ import schedule
 import time
 from scrapy.crawler import CrawlerProcess
 from project.spiders.stand_virtual_spider import StandVirtualSpider
-from project.utils.network_handler import NetworkUtils
+from scrapy.utils.project import get_project_settings
 
 
 def run_standvirtual_spider():
     print('Crawl started...')
     start_time = time.time()
-    process = CrawlerProcess(NetworkUtils.get_user_agent())
+    process = CrawlerProcess(get_project_settings())
     process.crawl(StandVirtualSpider)
     process.start()
     total_time = time.time() - start_time
@@ -17,7 +17,8 @@ def run_standvirtual_spider():
 
 def start_schedule():
     run_standvirtual_spider()
-    schedule.every.hour.do(run_standvirtual_spider)
+    schedule.every().hour.do(run_standvirtual_spider)
+
     while True:
         schedule.run_pending()
         time.sleep(1)

@@ -5,16 +5,22 @@ BOT_NAME = 'project'
 SPIDER_MODULES = ['project.spiders']
 NEWSPIDER_MODULE = 'project.spiders'
 
-LOG_LEVEL = 'INFO'
-# LOG_ENABLED = False
+# LOG_LEVEL = 'INFO'
+LOG_ENABLED = True
 USER_AGENT = NetworkUtils.get_user_agent()['USERAGENT']
 COOKIES_ENABLED = False
 HTTPCACHE_ENABLED = False
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'project (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+# MONGODB CONFIG
+ITEM_PIPELINES = {'project.pipelines.MongoDBPipeline': 300}
+
+MONGODB_SERVER = "localhost"
+MONGODB_PORT = 27017
+MONGODB_DB = "project_db"
+MONGODB_COLLECTION = "items"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32

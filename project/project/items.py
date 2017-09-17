@@ -12,6 +12,5 @@ class StandVirtualItem(Item):
     link = Field()
     title = Field()
     location = Field()
-
     capacity = Field()
     kms = Field()
