@@ -5,17 +5,16 @@ BOT_NAME = 'project'
 SPIDER_MODULES = ['project.spiders']
 NEWSPIDER_MODULE = 'project.spiders'
 
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 # LOG_ENABLED = False
 USER_AGENT = NetworkUtils.get_user_agent()['USERAGENT']
 COOKIES_ENABLED = False
 HTTPCACHE_ENABLED = False
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'project (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32

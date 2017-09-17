@@ -1,28 +1,47 @@
 import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
-from project.items import StandVirtualItem
-from project.utils.regex_handler import RegexHandler
+from ..items import StandVirtualItem
+from ..utils.regex_handler import RegexHandler
 
 
 class StandVirtualSpider(Spider):
     name = "standvirtual"
-
     allowed_domains = [
         "https://www.standvirtual.com",
         "www.standvirtual.com"
     ]
+    URL = None
 
     def start_requests(self):
         url = (
-            'https://www.standvirtual.com/'
-            'carros/{brand}/?search%5Bnew_used%5D=on'
-            .format(brand=self.brand)
+            'https://www.standvirtual.com/carros/'
         )
-        yield scrapy.Request(url, self.parse)
+        self.URL = url
+        yield scrapy.Request(url, self.parse_sitemap)
+
+    def parse_sitemap(self, response):
+        page_number_list = Selector(response).xpath(
+            ('''//*[@id="body-container"]/
+            div/div/ul/li/a/
+            span[@class="page"]/
+            text()''')
+        ).extract()
+
+        for page_number in page_number_list:
+            original_number = page_number
+            page_number = RegexHandler.get_number_value(page_number)
+            if not page_number:
+                page_number_list.remove(original_number)
+
+        for number in range(1, int(page_number_list[-1]) + 1):
+            url = self.URL + '?page={number}'.format(number=number)
+            yield scrapy.Request(url, self.parse)
 
     def parse(self, response):
-        """Parse ad preview's data into item object"""
+        """
+        Parse ad preview's data into item object and follows all the ad content links
+        """
         ad_previews = Selector(response).xpath(
             '//div[@class="offers list"]/article'
         )
@@ -123,15 +142,15 @@ class StandVirtualSpider(Spider):
 
         ad_contents_left_column = Selector(response).xpath(
             '//*[@id="parameters"]/ul[1]'
-            )
+        )
         ad_contents_right_column = Selector(response).xpath(
             '//*[@id="parameters"]/ul[2]'
-            )
+        )
         ad_contents = ad_contents_left_column + ad_contents_right_column
 
         for content_column in ad_contents:
             content_list_label = content_column.xpath(
-            ('''li[@class="offer-params__item"]/
+                ('''li[@class="offer-params__item"]/
                 span[@class="offer-params__label"]/
                 text()''')
             ).extract()
@@ -156,12 +175,12 @@ class StandVirtualSpider(Spider):
                     item['model'] = value
 
             for value in content_list_all_values:
-                    capacity_match = RegexHandler.get_capacity_value(value)
-                    if capacity_match:
-                        item['capacity'] = capacity_match
+                capacity_match = RegexHandler.get_capacity_value(value)
+                if capacity_match:
+                    item['capacity'] = capacity_match
 
-                    kms_match = RegexHandler.get_kms_value(value)
-                    if kms_match:
-                        item['kms'] = kms_match
+                kms_match = RegexHandler.get_kms_value(value)
+                if kms_match:
+                    item['kms'] = kms_match
 
         yield item

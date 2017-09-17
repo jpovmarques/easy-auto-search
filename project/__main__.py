@@ -1,14 +1,37 @@
+import schedule
+import time
 from scrapy.crawler import CrawlerProcess
 from project.spiders.stand_virtual_spider import StandVirtualSpider
 from project.utils.network_handler import NetworkUtils
 
 
-def main():
-    input_brand = input('Brand:')
+def run_standvirtual_spider():
+    print('Crawl started...')
+    start_time = time.time()
     process = CrawlerProcess(NetworkUtils.get_user_agent())
-    process.crawl(StandVirtualSpider, brand=input_brand)
+    process.crawl(StandVirtualSpider)
     process.start()
+    total_time = time.time() - start_time
+    print('Crawl stoped. total time of crawling: {time}'.format(time=total_time))
 
 
-if __name__ == "__main__":
-    main()
+def start_schedule():
+    run_standvirtual_spider()
+    schedule.every.hour.do(run_standvirtual_spider)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == '__main__':
+    def choose():
+        choice = input(
+            '''Are you sure you want to start the crawling process? : '''
+        )
+        if choice == 'y' or choice == 'yes':
+            start_schedule()
+        if choice == 'n' or choice == 'no':
+            exit()
+        else:
+            print('Invalid choice. Try again.')
+            choose()
+    choose()
