@@ -19,8 +19,8 @@ ITEM_PIPELINES = {'project.pipelines.MongoDBPipeline': 300}
 
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017
-MONGODB_DB = "project_db"
-MONGODB_COLLECTION = "items"
+MONGODB_DB = "easy_auto_search_db"
+MONGODB_COLLECTION = "standvirtual_collection"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32

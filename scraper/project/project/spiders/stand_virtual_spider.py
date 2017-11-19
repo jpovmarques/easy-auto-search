@@ -183,4 +183,5 @@ class StandVirtualSpider(Spider):
                 if kms_match:
                     item['kms'] = kms_match
 
+        print('Parse all the item ad content.')
         yield item
