@@ -6,7 +6,7 @@ from scrapy.utils.project import get_project_settings
 
 
 def run_standvirtual_spider():
-    print("Starting a job...")
+    print("Start one process at {time}.".format(time=time.item()))
     print('Crawl started...')
     start_time = time.time()
     process = CrawlerProcess(get_project_settings())
@@ -16,13 +16,12 @@ def run_standvirtual_spider():
     print('Crawl stoped. total time of crawling: {time}'.format(time=total_time))
 
 def start_one_process():
-    print("Start one process.")
     run_standvirtual_spider()
 
 def start_schedule():
     run_standvirtual_spider()
-    # schedule.every().hour.do(run_standvirtual_spider)
-    schedule.every(30).minutes.do(run_standvirtual_spider)
+    schedule.every().hour.do(run_standvirtual_spider)
+    # schedule.every(30).minutes.do(run_standvirtual_spider)
 
     while True:
         schedule.run_pending()

@@ -25,8 +25,34 @@ class Server:
         return Server.db_client.all()
 
     @route('/api/search')
-    def all_with_pagination():
-        page_size = int(request.query.size)
-        page_number = int(request.query.number)
-        brand = request.query.brand or None
-        return Server.db_client.search(page_size, page_number, brand)
+    def search_with_pagination():
+        try:
+            page_size = int(request.query.page_size)
+            page_number = int(request.query.page_number)
+            if page_size and page_number:
+                brand = request.query.brand or ''
+                model = request.query.model or ''
+                price_min = request.query.price_min or 0
+                price_max = request.query.price_max or 0
+                year_min = request.query.year_min or 0
+                year_max = request.query.year_max or 0
+                print('brand', repr(brand))
+                print('model', repr(model))
+                print('price_min', repr(price_min))
+                print('price_max', repr(price_max))
+                print('year_min', repr(year_min))
+                print('year_max', repr(year_max))
+                return Server.db_client.search(
+                    int(page_size),
+                    int(page_number),
+                    str(brand),
+                    str(model),
+                    int(price_min),
+                    int(price_max),
+                    int(year_min),
+                    int(year_max),
+                )
+            else:
+                return {'error': 'page size and page number are required params'}
+        except ValueError:
+            return {'error': 'invalid format for params'}

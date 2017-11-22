@@ -76,7 +76,7 @@ class StandVirtualSpider(Spider):
                 text()''')
             ).extract_first()
             if year:
-                item['year'] = year.rstrip()
+                item['year'] = int(year.strip().replace(" ", ""))
 
             link = ad.xpath(
                 ('''div[@class="offer-item__content"]/
@@ -106,7 +106,7 @@ class StandVirtualSpider(Spider):
                 text()''')
             ).extract_first()
             if price:
-                item['price'] = price.rstrip() + ' eur'
+                item['price'] = int(price.strip().replace(" ", ""))
 
             picture = ad.xpath(
                 ('''div[@class="offer-item__photo "]/
@@ -183,5 +183,4 @@ class StandVirtualSpider(Spider):
                 if kms_match:
                     item['kms'] = kms_match
 
-        print('Parse all the item ad content.')
         yield item

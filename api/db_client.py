@@ -1,6 +1,6 @@
 import json
-from pymongo import MongoClient
 import settings
+from pymongo import MongoClient
 
 
 class Database_client(object):
@@ -28,18 +28,39 @@ class Database_client(object):
         cursor = self.collection.find()
         return {'all_cars_list': [str(x) for x in cursor]}
 
-    def search(self, page_size, page_num, brand=None):
+    def search(
+            self,
+            page_size,
+            page_num,
+            brand=None,
+            model=None,
+            price_min=None,
+            price_max=None,
+            year_min=None,
+            year_max=None
+            ):
         """
-        returns a set of documents belonging to page number `page_num`
+        returns a set of documents with the given attributes
+        belonging to page number `page_num`
         where size of each page is `page_size`.
         """
+        print('brand', repr(brand))
+        print('model', repr(model))
+        print('price_min', repr(price_min))
+        print('price_max', repr(price_max))
+        print('year_min', repr(year_min))
+        print('year_max', repr(year_max))
+
         skips = page_size * (page_num - 1)
-        if not page_size or not page_num:
-            return {'error': 'page size and page number are required params'}
+        condition_list = []
+        if brand: condition_list.append({ "brand": brand })
+        if model: condition_list.append({ "model": model })
+        if price_min: condition_list.append({ "price": { "$gt": price_min } })
+        if price_max: condition_list.append({ "price": { "$lt": price_max } })
+        if year_min: condition_list.append({ "year": { "$gt": year_min } })
+        if year_max: condition_list.append({ "year": { "$lt": year_max } })
 
-        elif brand:
-            cursor = self.collection.find({"brand": brand}).skip(skips).limit(page_size)
-            return {'results': [str(x) for x in cursor if x['_id']]}
-
-        cursor = self.collection.find().skip(skips).limit(page_size)
+        query = { "$and": condition_list }
+        print('query', query)
+        cursor = self.collection.find(query).skip(skips).limit(page_size)
         return {'results': [str(x) for x in cursor if x['_id']]}
