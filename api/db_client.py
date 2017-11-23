@@ -44,13 +44,6 @@ class Database_client(object):
         belonging to page number `page_num`
         where size of each page is `page_size`.
         """
-        print('brand', repr(brand))
-        print('model', repr(model))
-        print('price_min', repr(price_min))
-        print('price_max', repr(price_max))
-        print('year_min', repr(year_min))
-        print('year_max', repr(year_max))
-
         skips = page_size * (page_num - 1)
         condition_list = []
         if brand: condition_list.append({ "brand": brand })
@@ -61,6 +54,6 @@ class Database_client(object):
         if year_max: condition_list.append({ "year": { "$lt": year_max } })
 
         query = { "$and": condition_list }
-        print('query', query)
+        print('query:', query)
         cursor = self.collection.find(query).skip(skips).limit(page_size)
         return {'results': [str(x) for x in cursor if x['_id']]}
