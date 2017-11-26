@@ -1,9 +1,10 @@
 import json
 import settings
+from utils import JSONEncoder
 from pymongo import MongoClient
 
 
-class Database_client(object):
+class Database_middleware(object):
     def __init__(self):
         """
         create a mongodb client instance.
@@ -17,16 +18,9 @@ class Database_client(object):
 
     def count(self):
         """
-        returns the total number of documents.
+        returns a json with the total number of documents.
         """
         return {'count': self.collection.count()}
-
-    def all(self):
-        """
-        returns all documents.
-        """
-        cursor = self.collection.find()
-        return {'all_cars_list': [str(x) for x in cursor]}
 
     def search(
             self,
@@ -40,9 +34,16 @@ class Database_client(object):
             year_max=None
             ):
         """
-        returns a set of documents with the given attributes
-        belonging to page number `page_num`
-        where size of each page is `page_size`.
+        returns a json set of documents with the given attributes
+        belonging to:
+        - page number `page_num` (required)
+        - page size `page_size` (required)
+        - brand `brand` (optional)
+        - model `model` (optional)
+        - minimum price `price_min` (optional)
+        - maximum price `price_max` (optional)
+        - minimum year `year_min` (optional)
+        - maximum year `year_max` (optional)
         """
         skips = page_size * (page_num - 1)
         condition_list = []
@@ -54,6 +55,8 @@ class Database_client(object):
         if year_max: condition_list.append({ "year": { "$lt": year_max } })
 
         query = { "$and": condition_list }
-        print('query:', query)
+        if (not brand and not model and not price_min and not year_min and not year_max): query = {}
+        print('debug_query:', query)
         cursor = self.collection.find(query).skip(skips).limit(page_size)
-        return {'results': [str(x) for x in cursor if x['_id']]}
+        json_response = JSONEncoder().encode({'results': [x for x in cursor if x['_id']]})
+        return json_response
