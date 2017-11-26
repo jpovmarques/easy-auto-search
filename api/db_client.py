@@ -57,6 +57,16 @@ class Database_middleware(object):
         query = { "$and": condition_list }
         if (not brand and not model and not price_min and not year_min and not year_max): query = {}
         print('debug_query:', query)
-        cursor = self.collection.find(query).skip(skips).limit(page_size)
-        json_response = JSONEncoder().encode({'results': [x for x in cursor if x['_id']]})
+        items = self.collection.find(query)
+        cursor = items.skip(skips).limit(page_size)
+        count = items.count()
+        json_response = json.dumps(
+            {
+                'results_list': [x for x in cursor],
+                'results_count': count
+            },
+            cls=JSONEncoder,
+            sort_keys=True,
+            indent=4,
+        )
         return json_response
