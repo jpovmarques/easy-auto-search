@@ -1,7 +1,7 @@
 import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
-from ..items import StandVirtualItem
+from ..items import CarItem
 from ..utils.regex_handler import RegexHandler
 
 
@@ -15,7 +15,7 @@ class StandVirtualSpider(Spider):
 
     def start_requests(self):
         url = (
-            'https://www.standvirtual.com/carros/'
+            "https://www.standvirtual.com/carros/"
         )
         self.URL = url
         yield scrapy.Request(url, self.parse_sitemap)
@@ -40,13 +40,13 @@ class StandVirtualSpider(Spider):
 
     def parse(self, response):
         """
-        Parse ad preview's data into item object and follows all the ad content links
+        Parse ad preview's data into item object and follow all the ad content links
         """
         ad_previews = Selector(response).xpath(
             '//div[@class="offers list"]/article'
         )
         for ad in ad_previews:
-            item = StandVirtualItem()
+            item = CarItem()
 
             gas_type = ad.xpath(
                 ('''div[@class="offer-item__content"]/
@@ -64,9 +64,9 @@ class StandVirtualSpider(Spider):
                 li[@data-code="power"]/
                 span/
                 text()''')
-            ).extract_first()
+            ).extract_first().replace(' cv', "")
             if power:
-                item['power'] = power
+                item['power'] = int(power)
 
             year = ad.xpath(
                 ('''div[@class="offer-item__content"]/
@@ -135,8 +135,7 @@ class StandVirtualSpider(Spider):
                 meta={'item': item}
             )
 
-    @staticmethod
-    def parse_content(response):
+    def parse_content(self, response):
         """Parse ad's full content into item object"""
         item = response.meta['item']
 
@@ -177,10 +176,10 @@ class StandVirtualSpider(Spider):
             for value in content_list_all_values:
                 capacity_match = RegexHandler.get_capacity_value(value)
                 if capacity_match:
-                    item['capacity'] = capacity_match
+                    item['capacity'] = int(capacity_match.replace(" cm3", "").replace(" ", ""))
 
                 kms_match = RegexHandler.get_kms_value(value)
                 if kms_match:
-                    item['kms'] = kms_match
+                    item['kms'] = int(kms_match.replace(" km", "").replace(" ", ""))
 
         yield item

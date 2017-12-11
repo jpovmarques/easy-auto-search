@@ -5,10 +5,10 @@ BOT_NAME = 'project'
 SPIDER_MODULES = ['project.spiders']
 NEWSPIDER_MODULE = 'project.spiders'
 
-# LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'DEBUG'
 LOG_ENABLED = True
 USER_AGENT = NetworkUtils.get_user_agent()['USERAGENT']
-COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 HTTPCACHE_ENABLED = False
 
 # Obey robots.txt rules
@@ -34,7 +34,7 @@ MONGODB_COLLECTION = "standvirtual_collection"
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# COOKIES_ENABLED = False
+# COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 # TELNETCONSOLE_ENABLED = False
