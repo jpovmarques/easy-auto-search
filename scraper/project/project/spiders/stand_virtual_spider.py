@@ -18,6 +18,7 @@ class StandVirtualSpider(Spider):
             "https://www.standvirtual.com/carros/"
         )
         self.URL = url
+        self.source_name = 'standvirtual'
         yield scrapy.Request(url, self.parse_sitemap)
 
     def parse_sitemap(self, response):
@@ -47,6 +48,7 @@ class StandVirtualSpider(Spider):
         )
         for ad in ad_previews:
             item = CarItem()
+            item['source'] = self.source_name
 
             gas_type = ad.xpath(
                 ('''div[@class="offer-item__content"]/

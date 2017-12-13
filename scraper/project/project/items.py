@@ -14,3 +14,4 @@ class CarItem(Item):
     location = Field()
     capacity = Field()
     kms = Field() #
+    source = Field() #

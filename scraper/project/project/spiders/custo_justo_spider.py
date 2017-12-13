@@ -1,3 +1,4 @@
+import re
 import scrapy
 from scrapy import Spider
 from scrapy.selector import Selector
@@ -14,35 +15,36 @@ class CustoJustoSpider(Spider):
             "http://www.custojusto.pt/portugal/carros-usados"
         )
         self.URL = url
-        yield scrapy.Request(url, self.parse)
+        self.source_name = 'custojusto'
+        yield scrapy.Request(url, self.parse_sitemap)
 
-    # def parse_sitemap(self, response):
-    #     page_number_list = Selector(response).xpath(
-    #         ('''//*[@id="body-container"]/
-    #         div/div/ul/li/a/
-    #         span[@class="page"]/
-    #         text()''')
-    #     ).extract()
-    #
-    #     for page_number in page_number_list:
-    #         original_number = page_number
-    #         page_number = RegexHandler.get_number_value(page_number)
-    #         if not page_number:
-    #             page_number_list.remove(original_number)
-    #
-    #     for number in range(1, int(page_number_list[-1]) + 1):
-    #         url = self.URL + '?page={number}'.format(number=number)
-    #         yield scrapy.Request(url, self.parse)
+    def parse_sitemap(self, response):
+        last_page_url = Selector(response).xpath(
+            ('''///html/body/div[5]/div/div/div[3]/div/div/div/ul[2]/li/a''')
+        ).extract_first()
+        try:
+            last_page_number = int(re.fullmatch(r"(.+)o=([\d]+)&(.+)", last_page_url).group(2))
+            for page in range(0, last_page_number + 1):
+                url = 'http://www.custojusto.pt/portugal/carros-usados?o={page}&st=a'.format(page=page)
+                yield scrapy.Request(
+                    url,
+                    callback=self.parse,
+                    dont_filter=True
+                )
+        except Exception as e:
+            return None
 
     def parse(self, response):
         """
         Parse ad preview's data into item object and follow all the ad content links
         """
+
         ad_previews = Selector(response).xpath(
             '//div[@id="dalist"]/a'
         )
         for ad in ad_previews:
             item = CarItem()
+            item['source'] = self.source_name
 
             link = ad.xpath(
                 '''@href'''
@@ -116,4 +118,4 @@ class CustoJustoSpider(Spider):
             if parsed_left_title == 'Fabricante': item['brand'] = right
             if parsed_left_title == 'Modelo': item['model'] = right
 
-        print('item', item)
+        yield item
