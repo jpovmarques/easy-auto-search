@@ -27,10 +27,6 @@ def api_status():
 def count():
     return db_client.count()
 
-@app.route('/api/all_cars')
-def all():
-    return db_client.all()
-
 @app.route('/api/search')
 def search_with_pagination():
     try:

@@ -11,13 +11,11 @@ class StandVirtualSpider(Spider):
         "https://www.standvirtual.com",
         "www.standvirtual.com"
     ]
-    URL = None
 
     def start_requests(self):
         url = (
             "https://www.standvirtual.com/carros/"
         )
-        self.URL = url
         self.source_name = 'standvirtual'
         yield scrapy.Request(url, self.parse_sitemap)
 
@@ -138,7 +136,9 @@ class StandVirtualSpider(Spider):
             )
 
     def parse_content(self, response):
-        """Parse ad's full content into item object"""
+        """
+        Parse ad's full content into item object
+        """
         item = response.meta['item']
 
         ad_contents_left_column = Selector(response).xpath(

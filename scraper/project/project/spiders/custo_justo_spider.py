@@ -7,14 +7,15 @@ from ..items import CarItem
 
 class CustoJustoSpider(Spider):
     name = "custojusto"
-    allowed_domains = ["*"]
-    URL = None
+    allowed_domains = [
+        'http://www.custojusto.pt',
+        'www.custojusto.pt'
+    ]
 
     def start_requests(self):
         url = (
             "http://www.custojusto.pt/portugal/carros-usados"
         )
-        self.URL = url
         self.source_name = 'custojusto'
         yield scrapy.Request(url, self.parse_sitemap)
 
@@ -67,6 +68,16 @@ class CustoJustoSpider(Spider):
                 text()''')
             ).extract_first().strip()
             item['title'] = title
+
+            location = ad.xpath(
+                ('''div[@class="row results"]/
+                div[@class="col-md-10 col-xs-8 no-padding-right norelative"]/
+                div[@class="col-md-12 col-sm-12 col-xs-6 pull-left no-padding norelative"]/
+                span[@class="hidden-xs"]/
+                text()''')
+            ).extract_first().strip()
+
+            item['location'] = location
 
             price = ad.xpath(
                 ('''div[@class="row results"]/
