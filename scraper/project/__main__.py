@@ -1,9 +1,11 @@
 import schedule
 import time
-from scrapy.crawler import CrawlerProcess
+from twisted.internet import reactor
+from scrapy.utils.log import configure_logging
+from scrapy.crawler import CrawlerRunner
 from project.spiders.stand_virtual_spider import StandVirtualSpider
 from project.spiders.custo_justo_spider import CustoJustoSpider
-
+from project.spiders.olx_spider import OlxSpider
 from scrapy.utils.project import get_project_settings
 
 
@@ -11,12 +13,24 @@ def run_spiders():
     print("Start one process at {time}.".format(time=time.time()))
     print('Crawl started...')
     start_time = time.time()
-    process = CrawlerProcess(get_project_settings())
-    # process.crawl(StandVirtualSpider)
-    process.crawl(CustoJustoSpider)
-    process.start()
+
+    settings = get_project_settings()
+
+    # mySettings = {'ITEM_PIPELINES': {'project.pipelines.MongoDBPipeline': 300}}
+
+    configure_logging()
+    runner = CrawlerRunner(settings)
+    runner.crawl(CustoJustoSpider)
+    runner.crawl(StandVirtualSpider)
+    runner.crawl(OlxSpider)
+
+    d = runner.join()
+    d.addBoth(lambda _: reactor.stop())
+    reactor.run()
+
     total_time = time.time() - start_time
     print('Crawl stoped. total time of crawling: {time}'.format(time=total_time))
+
 
 def start_one_process():
     run_spiders()

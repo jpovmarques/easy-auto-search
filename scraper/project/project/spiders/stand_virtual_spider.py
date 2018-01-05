@@ -34,7 +34,7 @@ class StandVirtualSpider(Spider):
                 page_number_list.remove(original_number)
 
         for number in range(1, int(page_number_list[-1]) + 1):
-            url = self.URL + '?page={number}'.format(number=number)
+            url = 'https://www.standvirtual.com/carros/' + '?page={number}'.format(number=number)
             yield scrapy.Request(url, self.parse)
 
     def parse(self, response):

@@ -15,7 +15,9 @@ HTTPCACHE_ENABLED = False
 ROBOTSTXT_OBEY = False
 
 # MONGODB CONFIG
-ITEM_PIPELINES = {'project.pipelines.MongoDBPipeline': 300}
+ITEM_PIPELINES = {
+    'project.pipelines.MongoDBPipeline': 300
+}
 
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017
@@ -63,11 +65,6 @@ MONGODB_COLLECTION = "car_items_collection"
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-# Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'project.pipelines.ProjectPipeline': 300,
-# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
